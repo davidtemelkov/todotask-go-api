@@ -92,6 +92,31 @@ func editPeople(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, person)
 }
 
+func deletePeople(c *gin.Context) {
+	id := c.Query("id")
+
+	uintNum, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	uintId := uint(uintNum)
+
+	person, err := getPersonByID(uintId)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	if err := db.Delete(&person).Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, person)
+}
+
 func getPersonByID(id uint) (Person, error) {
 	var person Person
 	result := db.First(&person, id)

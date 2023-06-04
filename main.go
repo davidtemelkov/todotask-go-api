@@ -20,10 +20,12 @@ func main() {
 	router.GET("/people", getPeople)
 	router.POST("/people", createPeople)
 	router.PUT("/people", editPeople)
+	router.DELETE("/people", deletePeople)
 
 	router.GET("/tasks", getToDoTasks)
 	router.POST("/tasks", createTasks)
 	router.PUT("/tasks", editTasks)
+	router.DELETE("/tasks", deleteTasks)
 
 	router.Run("localhost:8080")
 }
