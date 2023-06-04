@@ -16,9 +16,14 @@ func main() {
 	setupDB()
 
 	router := gin.Default()
+
 	router.GET("/people", getPeople)
 	router.POST("/people", createPeople)
+	router.PUT("/people", editPeople)
+
 	router.GET("/tasks", getToDoTasks)
 	router.POST("/tasks", createTasks)
+	router.PUT("/tasks", editTasks)
+
 	router.Run("localhost:8080")
 }
