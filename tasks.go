@@ -11,12 +11,13 @@ import (
 )
 
 type Todotask struct {
-	ID           uint
-	NAME         string
-	DESCRIPTION  string
-	CREATED_ON   time.Time
-	DONE         bool
-	ASSIGNMENTID uint
+	ID          uint
+	NAME        string
+	DESCRIPTION string `gorm:"column:DESCRIPTION"`
+	CREATED_ON  time.Time
+	DONE        bool
+	CREATOR_ID  uint `gorm:"column:CREATOR_ID"`
+	ASSIGNEE_ID uint `gorm:"column:ASSIGNEE_ID"`
 }
 
 func getToDoTasks(c *gin.Context) {
@@ -47,4 +48,20 @@ func getToDoTasks(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, toDoTask)
+}
+
+func createTasks(c *gin.Context) {
+	var newTask Todotask
+
+	if err := c.BindJSON(&newTask); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := db.Create(&newTask).Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusCreated, newTask)
 }

@@ -19,5 +19,6 @@ func main() {
 	router.GET("/people", getPeople)
 	router.POST("/people", createPeople)
 	router.GET("/tasks", getToDoTasks)
+	router.POST("/tasks", createTasks)
 	router.Run("localhost:8080")
 }
