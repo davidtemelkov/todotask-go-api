@@ -5,6 +5,8 @@ import (
 
 	"errors"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -31,16 +33,18 @@ func getPeople(c *gin.Context) {
 		return
 	}
 
-	var person Person
-	result := db.First(&person, id)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": "Person not found."})
+	uintNum, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
 
-			return
-		}
+	uintId := uint(uintNum)
 
-		panic(result.Error)
+	person, err := getPersonByID(uintId)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
 	}
 
 	c.IndentedJSON(http.StatusOK, person)
@@ -60,4 +64,42 @@ func createPeople(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusCreated, newPerson)
+}
+
+func editPeople(c *gin.Context) {
+	var newPerson Person
+
+	if err := c.BindJSON(&newPerson); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var person Person
+	person, err := getPersonByID(newPerson.ID)
+	if err != nil {
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	person.NAME = newPerson.NAME
+	person.AGE = newPerson.AGE
+
+	if err := db.Save(&person).Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, person)
+}
+
+func getPersonByID(id uint) (Person, error) {
+	var person Person
+	result := db.First(&person, id)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return person, errors.New("Person not found")
+		}
+		return person, result.Error
+	}
+	return person, nil
 }
