@@ -23,6 +23,7 @@ func main() {
 
 	router.GET("/tasks", getToDoTasks)
 	router.POST("/tasks", createTasks)
+	router.PUT("/tasks", editTasks)
 
 	router.Run("localhost:8080")
 }
