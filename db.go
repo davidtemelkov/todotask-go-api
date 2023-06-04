@@ -17,10 +17,8 @@ func setupDB() {
 		log.Fatal("DB_CONNECTION_STRING environment variable is not set")
 	}
 
-	dsn := dbConnectionString
-
 	var err error
-	db, err = gorm.Open(sqlserver.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(sqlserver.Open(dbConnectionString), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
